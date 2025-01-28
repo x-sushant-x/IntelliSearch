@@ -32,7 +32,7 @@ func (k *KafkaQueue) Consume() {
 	for {
 		m, err := r.ReadMessage(context.Background())
 		if err != nil {
-			log.Fatal("error while reading")
+			log.Fatal("error while consuming: " + err.Error())
 			break
 		}
 		fmt.Printf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
