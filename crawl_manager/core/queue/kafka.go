@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -25,11 +26,14 @@ func (q KafkaQueue) Send(topic, key string, data interface{}) error {
 		Topic: q.topic,
 	}
 
-	producer.WriteMessages(context.Background(), kafka.Message{
-		Topic: topic,
+	err := producer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(key),
 		Value: []byte(fmt.Sprint(data)),
 	})
+	if err != nil {
+		log.Printf("Failed to send message to topic %s: %v", topic, err)
+		return err
+	}
 
 	return nil
 }
