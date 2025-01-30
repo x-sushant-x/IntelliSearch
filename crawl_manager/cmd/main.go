@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	kafkaQueue := queue.NewKafkaQueue("localhost:9092", "crawl_urls")
+	kafkaQueue := queue.NewKafkaQueue("localhost:9092", "crawl-urls")
 
 	server := api.NewServer("8080")
 

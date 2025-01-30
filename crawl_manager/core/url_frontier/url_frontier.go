@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	crawlURLsKafkaTopic = "crawl_urls"
+	crawlURLsKafkaTopic = "crawl-urls"
 )
 
 type URLFrontier struct {

@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	kafkaConsumer := queue.NewKafkaQueue("localhost:9092", "IntelliSearch", 0)
-
-	go kafkaConsumer.Consume()
+	kafkaConsumer := queue.NewKafkaQueue("localhost:9092", "crawl-urls", 0)
 
 	log.Println("Crawler Started")
+
+	kafkaConsumer.Consume()
 
 	select {}
 }
