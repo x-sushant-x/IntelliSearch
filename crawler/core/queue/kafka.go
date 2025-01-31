@@ -3,13 +3,9 @@ package queue
 import (
 	"context"
 	"fmt"
+	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/segmentio/kafka-go"
 )
 
 type KafkaQueue struct {
@@ -48,29 +44,11 @@ func (k *KafkaQueue) Consume() {
 
 		htmlContent := core.ScrapURL(url)
 
-		wd, err := os.Getwd()
+		_, _, err = core.ExtractTitleAndMetaData(htmlContent)
+
 		if err != nil {
-			log.Println("error while getting working directory: " + err.Error())
+			log.Println("error while extracting title and metadata: " + err.Error())
 			continue
 		}
-
-		safeFilename := strings.ReplaceAll(url, "://", "_")
-		safeFilename = strings.ReplaceAll(safeFilename, "/", "_")
-
-		filePath := filepath.Join(wd, safeFilename+"_.html")
-
-		file, err := os.Create(filePath)
-		if err != nil {
-			log.Println("error while creating html content file: " + err.Error())
-			continue
-		}
-
-		_, err = file.Write([]byte(htmlContent))
-		if err != nil {
-			log.Println("error while saving html content: " + err.Error())
-			continue
-		}
-
-		fmt.Printf("message at offset %d: %s = %s\n", m.Offset, string(m.Key), string(m.Value))
 	}
 }
