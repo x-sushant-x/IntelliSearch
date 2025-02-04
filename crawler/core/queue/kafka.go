@@ -2,7 +2,6 @@ package queue
 
 import (
 	"context"
-	"fmt"
 	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
@@ -26,14 +25,12 @@ func (k *KafkaQueue) Consume() {
 	log.Println("Kafka queue consuming...")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:     []string{k.connAddr},
-		Topic:       k.topic,
-		Partition:   k.partition,
-		StartOffset: kafka.FirstOffset,
+		Brokers:   []string{k.connAddr},
+		Topic:     k.topic,
+		Partition: k.partition,
 	})
 
 	for {
-		fmt.Println("Waiting for message...")
 		m, err := r.ReadMessage(context.Background())
 		if err != nil {
 			log.Println("error while consuming: " + err.Error())
@@ -44,10 +41,9 @@ func (k *KafkaQueue) Consume() {
 
 		htmlContent := core.ScrapURL(url)
 
-		_, _, err = core.ExtractTitleAndMetaData(htmlContent)
-
+		_, err = core.ExtractContent(htmlContent)
 		if err != nil {
-			log.Println("error while extracting title and metadata: " + err.Error())
+			log.Println("error while extracting page content: " + err.Error())
 			continue
 		}
 	}
