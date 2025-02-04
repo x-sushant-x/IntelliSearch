@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	kafkaConsumer := queue.NewKafkaQueue("localhost:9092", "crawl-urls", 0)
+	kafkaConsumer := queue.NewKafkaQueue("localhost:9092", "crawl_urls", 0)
 
 	log.Println("Crawler Started")
 

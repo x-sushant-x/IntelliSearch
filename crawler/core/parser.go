@@ -5,6 +5,7 @@ import (
 	"golang.org/x/net/html"
 	"log"
 	"strings"
+	"time"
 )
 
 func extractTitleAndMetaData(node *html.Node) (string, string, error) {
@@ -44,8 +45,11 @@ func extractTitleAndMetaData(node *html.Node) (string, string, error) {
 	return title, metaDescription, nil
 }
 
-func ExtractContent(htmlContent string) (*models.CrawledPage, error) {
+func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 	crawledContent := models.CrawledPage{}
+
+	crawledContent.CrawledAt = time.Now()
+	crawledContent.Url = pageURL
 
 	node, err := html.Parse(strings.NewReader(htmlContent))
 	if err != nil {

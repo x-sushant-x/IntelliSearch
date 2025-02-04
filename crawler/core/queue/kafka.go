@@ -2,7 +2,7 @@ package queue
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
@@ -42,13 +42,19 @@ func (k *KafkaQueue) Consume() {
 
 		htmlContent := core.ScrapURL(url)
 
-		crawledPage, err := core.ExtractContent(htmlContent)
+		crawledPage, err := core.ExtractContent(htmlContent, url)
 		if err != nil {
 			log.Println("error while extracting page content: " + err.Error())
 			continue
 		}
 
-		k.Send("crawled_pages", "", crawledPage)
+		marshal, err := json.Marshal(crawledPage)
+		if err != nil {
+			log.Println("error while marshalling page content: " + err.Error())
+			continue
+		}
+
+		k.Send("crawled_pages", "", marshal)
 	}
 }
 
@@ -58,9 +64,15 @@ func (k *KafkaQueue) Send(topic, key string, data interface{}) {
 		Topic: topic,
 	}
 
+	dataBytes, ok := data.([]byte)
+	if !ok {
+		log.Println("Failed to convert data to byte slice")
+		return
+	}
+
 	err := producer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(key),
-		Value: []byte(fmt.Sprint(data)),
+		Value: dataBytes,
 	})
 
 	if err != nil {

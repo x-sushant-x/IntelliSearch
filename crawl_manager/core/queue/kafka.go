@@ -2,7 +2,10 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/models"
 	"log"
 
 	"github.com/segmentio/kafka-go"
@@ -11,12 +14,14 @@ import (
 type KafkaQueue struct {
 	topic    string
 	connAddr string
+	mongoDB  database.DB
 }
 
-func NewKafkaQueue(connAddr, topic string) *KafkaQueue {
+func NewKafkaQueue(connAddr, topic string, db database.DB) *KafkaQueue {
 	return &KafkaQueue{
 		topic:    topic,
 		connAddr: connAddr,
+		mongoDB:  db,
 	}
 }
 
@@ -53,6 +58,14 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 			continue
 		}
 
-		fmt.Println("Page Crawled: " + string(message.Value))
+		msgBytes := message.Value
+		crawledPage := models.CrawledPage{}
+		err = json.Unmarshal(msgBytes, &crawledPage)
+		if err != nil {
+			log.Println("error while un-marshalling crawled page: " + err.Error())
+			continue
+		}
+
+		q.mongoDB.SaveCrawledPage(&crawledPage)
 	}
 }
