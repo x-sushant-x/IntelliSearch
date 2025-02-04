@@ -14,5 +14,7 @@ func main() {
 
 	log.Println("Crawl Manager Started")
 
+	go kafkaQueue.ConsumeCrawledPages()
+
 	server.Start(kafkaQueue)
 }

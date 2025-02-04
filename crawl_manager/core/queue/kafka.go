@@ -37,3 +37,22 @@ func (q KafkaQueue) Send(topic, key string, data interface{}) error {
 
 	return nil
 }
+
+func (q KafkaQueue) ConsumeCrawledPages() {
+	fmt.Println("Waiting for crawled pages from crawler...")
+
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{"localhost:9092"},
+		Topic:   "crawled_pages",
+	})
+
+	for {
+		message, err := r.ReadMessage(context.Background())
+		if err != nil {
+			log.Println("error while consuming: " + err.Error())
+			continue
+		}
+
+		fmt.Println("Page Crawled: " + string(message.Value))
+	}
+}

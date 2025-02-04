@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
@@ -41,10 +42,28 @@ func (k *KafkaQueue) Consume() {
 
 		htmlContent := core.ScrapURL(url)
 
-		_, err = core.ExtractContent(htmlContent)
+		crawledPage, err := core.ExtractContent(htmlContent)
 		if err != nil {
 			log.Println("error while extracting page content: " + err.Error())
 			continue
 		}
+
+		k.Send("crawled_pages", "", crawledPage)
+	}
+}
+
+func (k *KafkaQueue) Send(topic, key string, data interface{}) {
+	producer := &kafka.Writer{
+		Addr:  kafka.TCP(k.connAddr),
+		Topic: topic,
+	}
+
+	err := producer.WriteMessages(context.Background(), kafka.Message{
+		Key:   []byte(key),
+		Value: []byte(fmt.Sprint(data)),
+	})
+
+	if err != nil {
+		log.Printf("Failed to send crawled page back to crawl manager: %v", err)
 	}
 }
