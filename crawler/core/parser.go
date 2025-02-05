@@ -4,6 +4,7 @@ import (
 	"github.com/x-sushant-x/IntelliSearch/crawler/models"
 	"golang.org/x/net/html"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -70,18 +71,17 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 
 	getPageContent = func(node *html.Node) {
 		if node.Type == html.ElementNode {
-			if node.Data == "p" && node.FirstChild != nil {
-				crawledContent.TextContent += node.FirstChild.Data + "\n"
-			}
-
-			if node.Type == html.ElementNode &&
-				(node.Data == "h1" ||
+			if node.Type == html.ElementNode && node.Data != "script" && node.Data != "style" &&
+				(node.Data == "p" ||
+					node.Data == "h1" ||
 					node.Data == "h2" ||
 					node.Data == "h3" ||
 					node.Data == "h4" ||
 					node.Data == "h5" ||
-					node.Data == "h6") {
-				crawledContent.TextContent += node.FirstChild.Data + "\n"
+					node.Data == "h6" ||
+					node.Data == "div" ||
+					node.Data == "span") {
+				crawledContent.TextContent += getTextContent(node) + "\n"
 			}
 
 			if node.Data == "img" {
@@ -97,8 +97,8 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 			if node.Data == "a" {
 				for _, attr := range node.Attr {
 					if attr.Key == "href" {
-						URL := attr.Val
-						crawledContent.AssociatedURLs = append(crawledContent.AssociatedURLs, URL)
+						absoluteURL := resolveURL(pageURL, attr.Val)
+						crawledContent.AssociatedURLs = append(crawledContent.AssociatedURLs, absoluteURL)
 					}
 				}
 			}
@@ -112,4 +112,27 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 	getPageContent(node)
 
 	return &crawledContent, nil
+}
+
+func getTextContent(node *html.Node) string {
+	if node.Type == html.TextNode {
+		return strings.TrimSpace(node.Data)
+	}
+
+	text := ""
+
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		text += getTextContent(c) + " "
+	}
+
+	return strings.TrimSpace(text)
+}
+
+func resolveURL(base, relative string) string {
+	u, err := url.Parse(relative)
+	if err != nil || u.Scheme == "" {
+		baseURL, _ := url.Parse(base)
+		return baseURL.ResolveReference(u).String()
+	}
+	return relative
 }

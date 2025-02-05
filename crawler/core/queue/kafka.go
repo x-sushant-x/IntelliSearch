@@ -6,6 +6,8 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
+	"os"
+	"strings"
 )
 
 type KafkaQueue struct {
@@ -54,14 +56,33 @@ func (k *KafkaQueue) Consume() {
 			continue
 		}
 
-		k.Send("crawled_pages", "", marshal)
+		urlFilePath := strings.Replace(url, "/", "_", len(url))
+		filePath := "/Users/sushantdhiman/GoLang/IntelliSearch/crawled_pages/" + urlFilePath + ".txt"
+
+		f, err := os.Create(filePath)
+		if err != nil {
+			log.Println("error while creating file for page content: " + err.Error())
+			continue
+		}
+
+		_, err = f.WriteString(string(marshal))
+		if err != nil {
+			log.Println("error while writing file for page content: " + err.Error())
+			continue
+		}
+
+		k.Send("crawled_pages", "", filePath)
+
+		log.Println("Page: " + url + " crawled successfully.")
+
 	}
 }
 
 func (k *KafkaQueue) Send(topic, key string, data interface{}) {
 	producer := &kafka.Writer{
-		Addr:  kafka.TCP(k.connAddr),
-		Topic: topic,
+		Addr:       kafka.TCP(k.connAddr),
+		Topic:      topic,
+		BatchBytes: 10485760,
 	}
 
 	dataBytes, ok := data.([]byte)
