@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/models"
+	"io"
 	"log"
+	"os"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -60,14 +62,30 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 			continue
 		}
 
-		msgBytes := message.Value
-		crawledPage := models.CrawledPage{}
-		err = json.Unmarshal(msgBytes, &crawledPage)
+		crawledFilePath := message.Value
+
+		file, err := os.Open(string(crawledFilePath))
 		if err != nil {
-			log.Println("error while un-marshalling crawled page: " + err.Error())
+			log.Println("error while opening file: " + err.Error())
 			continue
 		}
 
-		q.mongoDB.SaveCrawledPage(&crawledPage)
+		defer file.Close()
+
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			log.Println("error while reading file: " + err.Error())
+			continue
+		}
+
+		var crawledData models.CrawledPage
+
+		err = json.Unmarshal(fileBytes, &crawledData)
+		if err != nil {
+			log.Println("error while marshalling file: " + err.Error())
+			continue
+		}
+
+		q.mongoDB.SaveCrawledPage(&crawledData)
 	}
 }

@@ -3,6 +3,7 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/segmentio/kafka-go"
 	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
@@ -85,15 +86,9 @@ func (k *KafkaQueue) Send(topic, key string, data interface{}) {
 		BatchBytes: 10485760,
 	}
 
-	dataBytes, ok := data.([]byte)
-	if !ok {
-		log.Println("Failed to convert data to byte slice")
-		return
-	}
-
 	err := producer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(key),
-		Value: dataBytes,
+		Value: []byte(fmt.Sprint(data)),
 	})
 
 	if err != nil {
