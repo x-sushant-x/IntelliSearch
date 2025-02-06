@@ -29,9 +29,11 @@ func (k *KafkaQueue) Consume() {
 	log.Println("Kafka queue consuming...")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{k.connAddr},
-		Topic:     k.topic,
-		Partition: k.partition,
+		Brokers:     []string{k.connAddr},
+		Topic:       k.topic,
+		Partition:   k.partition,
+		GroupID:     "crawler_group",
+		StartOffset: kafka.LastOffset,
 	})
 
 	for {

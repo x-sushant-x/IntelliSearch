@@ -49,9 +49,11 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 	fmt.Println("Waiting for crawled pages from crawler...")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"localhost:9092"},
-		Topic:    "crawled_pages",
-		MaxBytes: 10485760,
+		Brokers:     []string{"localhost:9092"},
+		Topic:       "crawled_pages",
+		MaxBytes:    10485760,
+		GroupID:     "crawled_pages_group",
+		StartOffset: kafka.LastOffset,
 	})
 
 	for {

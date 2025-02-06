@@ -71,7 +71,14 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 
 	getPageContent = func(node *html.Node) {
 		if node.Type == html.ElementNode {
-			if node.Type == html.ElementNode && node.Data != "script" && node.Data != "style" &&
+			switch node.Data {
+			case "header", "nav", "footer", "aside", "form", "script", "noscript", "iframe":
+				return
+			}
+		}
+
+		if node.Type == html.ElementNode {
+			if node.Type == html.ElementNode &&
 				(node.Data == "p" ||
 					node.Data == "h1" ||
 					node.Data == "h2" ||
@@ -81,6 +88,19 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 					node.Data == "h6" ||
 					node.Data == "div" ||
 					node.Data == "span") {
+
+				for _, attr := range node.Attr {
+					if attr.Key == "id" || attr.Key == "class" {
+						nodeData := attr.Val
+
+						if strings.Contains(nodeData, "menu") ||
+							strings.Contains(nodeData, "navigation") ||
+							strings.Contains(nodeData, "header") ||
+							strings.Contains(nodeData, "footer") {
+						}
+					}
+				}
+
 				crawledContent.TextContent += getTextContent(node) + "\n"
 			}
 
@@ -102,6 +122,10 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 					}
 				}
 			}
+		}
+
+		if node.Type == html.ElementNode && node.Data == "button" {
+			return
 		}
 
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
