@@ -32,21 +32,11 @@ func NewMongoDBConnection() *MongoDBStore {
 func (db *MongoDBStore) CreateIndexes() {
 	coll := db.client.Database("IntelliSense").Collection("crawled_pages")
 
-	titleModel := mongo.IndexModel{
-		Keys: bson.D{{Key: "title", Value: "text"}},
+	index := mongo.IndexModel{
+		Keys: bson.D{{Key: "metaData", Value: "text"}, {Key: "title", Value: "text"}},
 	}
 
-	metaDescriptionModel := mongo.IndexModel{
-		Keys: bson.D{{Key: "metaData", Value: "text"}},
-	}
-
-	_, err := coll.Indexes().CreateOne(context.TODO(), titleModel)
-
-	if err != nil {
-		panic("unable to create index in database: " + err.Error())
-	}
-
-	_, err = coll.Indexes().CreateOne(context.TODO(), metaDescriptionModel)
+	_, err := coll.Indexes().CreateOne(context.TODO(), index)
 
 	if err != nil {
 		panic("unable to create index in database" + err.Error())
@@ -54,7 +44,7 @@ func (db *MongoDBStore) CreateIndexes() {
 
 }
 
-func (db *MongoDBStore) SaveCrawledPage(query string) (*[]models.SearchResponse, error) {
+func (db *MongoDBStore) Search(query string) (*[]models.SearchResponse, error) {
 	coll := db.client.Database("IntelliSense").Collection("crawled_pages")
 
 	filter := bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: query}}}}
