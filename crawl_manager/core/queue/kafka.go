@@ -13,6 +13,10 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+const (
+	crawlURLsKafkaTopic = "crawl_urls"
+)
+
 type KafkaQueue struct {
 	topic    string
 	connAddr string
@@ -57,7 +61,6 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 	})
 
 	for {
-		log.Println("Received Crawled Page")
 		message, err := r.ReadMessage(context.Background())
 		if err != nil {
 			log.Println("error while consuming: " + err.Error())
@@ -89,5 +92,12 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 		}
 
 		q.mongoDB.SaveCrawledPage(&crawledData)
+
+		for _, newURL := range crawledData.AssociatedURLs {
+			err := q.Send(crawlURLsKafkaTopic, "", newURL)
+			if err != nil {
+				log.Println("unable to send newly discovered url to crawler")
+			}
+		}
 	}
 }

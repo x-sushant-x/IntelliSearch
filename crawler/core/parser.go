@@ -118,7 +118,10 @@ func ExtractContent(htmlContent, pageURL string) (*models.CrawledPage, error) {
 				for _, attr := range node.Attr {
 					if attr.Key == "href" {
 						absoluteURL := resolveURL(pageURL, attr.Val)
-						crawledContent.AssociatedURLs = append(crawledContent.AssociatedURLs, absoluteURL)
+
+						if !strings.Contains(absoluteURL, pageURL) {
+							crawledContent.AssociatedURLs = append(crawledContent.AssociatedURLs, absoluteURL)
+						}
 					}
 				}
 			}

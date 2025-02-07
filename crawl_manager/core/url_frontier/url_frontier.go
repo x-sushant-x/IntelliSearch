@@ -1,8 +1,9 @@
 package urlfrontier
 
 import (
-	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/queue"
 	"log"
+
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/queue"
 )
 
 const (
