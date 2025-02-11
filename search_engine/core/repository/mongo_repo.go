@@ -45,6 +45,8 @@ func (db *MongoDBStore) CreateIndexes() {
 }
 
 func (db *MongoDBStore) Search(query string) (*[]models.SearchResponse, error) {
+	var response []models.SearchResponse
+
 	coll := db.client.Database("IntelliSense").Collection("crawled_pages")
 
 	filter := bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: query}}}}
@@ -52,17 +54,15 @@ func (db *MongoDBStore) Search(query string) (*[]models.SearchResponse, error) {
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		log.Println("unable to get result from database: " + err.Error())
-		return nil, err
+		return &response, err
 	}
 
 	var results []models.CrawledPage
 
 	if err := cursor.All(context.TODO(), &results); err != nil {
 		log.Println("unable to parse result from database: " + err.Error())
-		return nil, err
+		return &response, err
 	}
-
-	var response []models.SearchResponse
 
 	for _, doc := range results {
 		resp := models.SearchResponse{
@@ -71,6 +71,10 @@ func (db *MongoDBStore) Search(query string) (*[]models.SearchResponse, error) {
 			Url:             doc.Url,
 		}
 		response = append(response, resp)
+	}
+
+	if response == nil {
+		response = []models.SearchResponse{}
 	}
 
 	return &response, nil
