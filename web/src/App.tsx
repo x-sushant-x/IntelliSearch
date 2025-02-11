@@ -75,13 +75,13 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="mt-6 space-x-4">
-          <a href="https://example.com" className="text-blue-500 hover:underline">
+          <a href="https://sushantcodes.tech" className="text-blue-500 hover:underline">
             About
           </a>
-          <a href="https://example.com" className="text-blue-500 hover:underline">
+          <a href="mailto:sushant.dhiman9812@gmail.com" className="text-blue-500 hover:underline">
             Contact
           </a>
-          <a href="https://example.com" className="text-blue-500 hover:underline">
+          <a href="https://linkedin.com/in/sushant102004" className="text-blue-500 hover:underline">
             Follow
           </a>
         </div>
