@@ -1,13 +1,19 @@
 import { useState } from "react";
 
-const LandingPage = () => {
-  const [isSearched, setIsSearched] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+interface SearchResult {
+  title: string;
+  url: string;
+  metaData?: string;
+}
 
-  const fetchResults = async (query) => {
+const LandingPage: React.FC = () => {
+  const [isSearched, setIsSearched] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+
+  const fetchResults = async (query: string): Promise<void> => {
     setIsLoading(true);
     setError("");
 
@@ -25,14 +31,9 @@ const LandingPage = () => {
         throw new Error("Failed to fetch results");
       }
 
-      const data = await response.json();
+      const data: SearchResult[] = await response.json();
 
-      if (!Array.isArray(data)) {
-        setResults([]);
-      } else {
-        setResults(data);
-      }
-
+      setResults(Array.isArray(data) ? data : []);
       setIsSearched(true);
     } catch (err) {
       setError("An error occurred while fetching results. Please try again.");
@@ -42,8 +43,7 @@ const LandingPage = () => {
     }
   };
 
-  // Handle search
-  const handleSearch = () => {
+  const handleSearch = (): void => {
     if (query.trim()) {
       fetchResults(query);
     }
@@ -51,7 +51,6 @@ const LandingPage = () => {
 
   return (
     <div>
-      {/* Search Engine Box */}
       <div className="flex flex-col mt-12 items-center bg-white">
         <h1 className="mb-12 text-4xl text-slate-800">IntelliSearch</h1>
 
@@ -88,7 +87,6 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Results Area */}
       {isSearched ? (
         <div className="mt-12 mx-24">
           <h2 className="text-2xl text-slate-800 mb-6">Search Results for "{query}"</h2>
@@ -108,7 +106,7 @@ const LandingPage = () => {
                   >
                     {result.title}
                   </a>
-                  <p className="text-gray-600">{result.metaDescription}</p>
+                  <p className="text-gray-600">{result.metaData || "No description available."}</p>
                 </div>
               ))}
             </div>
