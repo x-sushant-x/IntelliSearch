@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	database "github.com/x-sushant-x/IntelliSearch/search_engine/core/repository"
 	"github.com/x-sushant-x/IntelliSearch/search_engine/core/services"
 )
@@ -18,6 +19,8 @@ func NewServer(port string) *Server {
 
 func (s *Server) Start() {
 	app := fiber.New()
+
+	app.Use(cors.New())
 
 	db := database.NewMongoDBConnection()
 
