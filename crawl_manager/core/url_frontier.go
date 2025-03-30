@@ -1,4 +1,4 @@
-package urlfrontier
+package core
 
 import (
 	"log"

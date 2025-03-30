@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gofiber/fiber/v2"
-	urlfrontier "github.com/x-sushant-x/IntelliSearch/crawl_manager/core/url_frontier"
+	urlfrontier "github.com/x-sushant-x/IntelliSearch/crawl_manager/core"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/models"
 )
 
