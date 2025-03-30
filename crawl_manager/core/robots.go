@@ -2,7 +2,6 @@ package core
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -41,11 +40,7 @@ func (r RobotsChecker) getRobotsFile(link string) ([]string, error) {
 
 	disallowedLinks := r.parseFile(string(content))
 
-	for _, link := range disallowedLinks {
-		fmt.Println("Link: " + link)
-	}
-
-	return nil, nil
+	return disallowedLinks, nil
 }
 
 func (r RobotsChecker) parseFile(file string) []string {

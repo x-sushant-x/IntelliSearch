@@ -50,15 +50,20 @@ func (q KafkaQueue) Send(topic, key string, data interface{}) error {
 }
 
 func (q KafkaQueue) ConsumeCrawledPages() {
-	fmt.Println("Waiting for crawled pages from crawler...")
+	log.Println("Waiting for crawled pages from crawler...")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{"localhost:9092"},
 		Topic:       "crawled_pages",
 		MaxBytes:    10485760,
 		GroupID:     "crawled_pages_group",
-		StartOffset: kafka.LastOffset,
+		StartOffset: kafka.FirstOffset,
 	})
+
+	if _, err := r.FetchMessage(context.Background()); err != nil {
+		log.Println(err.Error())
+		os.Exit(-1)
+	}
 
 	for {
 		message, err := r.ReadMessage(context.Background())
