@@ -11,6 +11,10 @@ import (
 	"strings"
 )
 
+const (
+	kafkaCrawledPagesTopic = "crawled_pages"
+)
+
 type KafkaQueue struct {
 	topic     string
 	partition int
@@ -74,7 +78,7 @@ func (k *KafkaQueue) Consume() {
 			continue
 		}
 
-		k.Send("crawled_pages", "", filePath)
+		k.Send(kafkaCrawledPagesTopic, "", filePath)
 
 		log.Println("Page: " + url + " crawled successfully.")
 
