@@ -7,10 +7,14 @@ import (
 	"log"
 )
 
+const (
+	kafkaTopic = "crawl_urls"
+)
+
 func main() {
 	mongoDB := database.NewMongoDBConnection()
 
-	kafkaQueue := queue.NewKafkaQueue("localhost:9092", "crawl_urls", mongoDB)
+	kafkaQueue := queue.NewKafkaQueue("localhost:9092", kafkaTopic, mongoDB)
 
 	server := api.NewServer("8080")
 
