@@ -1,6 +1,6 @@
 ### Simple Web Crawler Written in Golang
 
-It it not a perfect implementation. I made it because I was bored of making APIs and wanted to learn something new. 
+It not a perfect implementation. I made it because I was bored of making APIs and wanted to learn something new. 
 
 ### Steps To Run:
 
