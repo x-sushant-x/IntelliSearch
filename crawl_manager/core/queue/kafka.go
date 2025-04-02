@@ -50,7 +50,7 @@ func (q KafkaQueue) Send(topic, key string, data interface{}) error {
 }
 
 func (q KafkaQueue) ConsumeCrawledPages() {
-	log.Println("Waiting for crawled pages from crawler...")
+	log.Println("Connecting: Kafka...")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{"localhost:9092"},
@@ -61,9 +61,11 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 	})
 
 	if _, err := r.FetchMessage(context.Background()); err != nil {
-		log.Println(err.Error())
+		log.Println("unable to connect to kafka: " + err.Error())
 		os.Exit(-1)
 	}
+
+	log.Println("Connected: Kafka")
 
 	for {
 		message, err := r.ReadMessage(context.Background())

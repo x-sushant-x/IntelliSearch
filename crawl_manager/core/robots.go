@@ -10,6 +10,10 @@ import (
 
 type RobotsChecker struct{}
 
+func NewRobotsChecker() RobotsChecker {
+	return RobotsChecker{}
+}
+
 func (r RobotsChecker) getRobotsFile(link string) ([]string, error) {
 	// Complete URL: https://en.wikipedia.org/wiki/Go_(programming_language)
 

@@ -16,7 +16,9 @@ func NewServer(port string) *Server {
 }
 
 func (s *Server) Start(messageQueue queue.MessageQueue) {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
 
 	frontier := urlfrontier.NewURLFrontier(messageQueue)
 	crawlController := NewCrawlController(frontier)
