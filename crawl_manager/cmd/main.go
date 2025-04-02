@@ -13,7 +13,7 @@ const (
 
 func main() {
 	mongoDB := database.NewMongoDBConnection()
-	cache.NewRedisCache()
+	redisCache := cache.NewRedisCache()
 
 	kafkaQueue := queue.NewKafkaQueue("localhost:9092", kafkaTopic, mongoDB)
 
@@ -21,5 +21,5 @@ func main() {
 
 	go kafkaQueue.ConsumeCrawledPages()
 
-	server.Start(kafkaQueue)
+	server.Start(kafkaQueue, redisCache)
 }

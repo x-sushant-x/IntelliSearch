@@ -8,13 +8,14 @@ import (
 	"strings"
 )
 
-type RobotsChecker struct{}
+type RobotsDownloader struct{}
 
-func NewRobotsChecker() RobotsChecker {
-	return RobotsChecker{}
+func NewRobotsDownloader() RobotsDownloader {
+	return RobotsDownloader{}
 }
 
-func (r RobotsChecker) getRobotsFile(link string) ([]string, error) {
+// GetDisallowedLinks TODO - Handle * wildcards
+func (r RobotsDownloader) GetDisallowedLinks(link string) ([]string, error) {
 	// Complete URL: https://en.wikipedia.org/wiki/Go_(programming_language)
 
 	// Base URL: https://en.wikipedia.org/
@@ -47,7 +48,7 @@ func (r RobotsChecker) getRobotsFile(link string) ([]string, error) {
 	return disallowedLinks, nil
 }
 
-func (r RobotsChecker) parseFile(file string) []string {
+func (r RobotsDownloader) parseFile(file string) []string {
 	var disallowedLinks []string
 
 	scanner := bufio.NewScanner(strings.NewReader(file))
