@@ -65,7 +65,6 @@ func (f URLFrontier) SendURLToQueueForCrawling(urls []string) {
 		_, found := f.robots[hostName]
 
 		if found {
-			log.Printf("Cached robots.txt found for host name: %s\n", hostName)
 			url = strings.TrimSpace(url)
 
 			disallowed := f.bloomCache.CheckBloom(url)
@@ -80,6 +79,8 @@ func (f URLFrontier) SendURLToQueueForCrawling(urls []string) {
 			if err != nil {
 				log.Default().Println("Unable to send crawling URL to queue:", err)
 			}
+		} else {
+			log.Println("Skipping Crawl: Unable to get robots.txt")
 		}
 
 	}
