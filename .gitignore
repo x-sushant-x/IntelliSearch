@@ -1,2 +1,3 @@
 *.html
 crawled_pages
+crawl_manager/.env
