@@ -2,13 +2,13 @@ package queue
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
-	"github.com/x-sushant-x/IntelliSearch/crawl_manager/models"
 	"io"
 	"log"
 	"os"
+
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/elastic"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -90,21 +90,23 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 			continue
 		}
 
-		var crawledData models.CrawledPage
+		elastic.IndexData(fileBytes)
 
-		err = json.Unmarshal(fileBytes, &crawledData)
-		if err != nil {
-			log.Println("error while marshalling file: " + err.Error())
-			continue
-		}
+		// var crawledData models.CrawledPage
 
-		q.mongoDB.SaveCrawledPage(&crawledData)
+		// err = json.Unmarshal(fileBytes, &crawledData)
+		// if err != nil {
+		// 	log.Println("error while marshalling file: " + err.Error())
+		// 	continue
+		// }
 
-		for _, newURL := range crawledData.AssociatedURLs {
-			err := q.Send(crawlURLsKafkaTopic, "", newURL)
-			if err != nil {
-				log.Println("unable to send newly discovered url to crawler")
-			}
-		}
+		// q.mongoDB.SaveCrawledPage(&crawledData)
+
+		// for _, newURL := range crawledData.AssociatedURLs {
+		// 	err := q.Send(crawlURLsKafkaTopic, "", newURL)
+		// 	if err != nil {
+		// 		log.Println("unable to send newly discovered url to crawler")
+		// 	}
+		// }
 	}
 }

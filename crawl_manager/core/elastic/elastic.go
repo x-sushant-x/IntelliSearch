@@ -1,6 +1,7 @@
-package core
+package elastic
 
 import (
+	"bytes"
 	"log"
 	"os"
 
@@ -8,13 +9,17 @@ import (
 )
 
 var (
-	ElasticClient *elasticsearch.Client
+	elasticClient *elasticsearch.Client
+)
+
+const (
+	ElasticIndex = "crawled_data"
 )
 
 func NewElasticClient() {
 	user, pass := getElasticUserAndPassword()
 
-	if ElasticClient == nil {
+	if elasticClient == nil {
 		client, err := elasticsearch.NewClient(elasticsearch.Config{
 			Username: user,
 			Password: pass,
@@ -25,7 +30,7 @@ func NewElasticClient() {
 			os.Exit(-1)
 		}
 
-		ElasticClient = client
+		elasticClient = client
 
 		resp, err := client.Ping()
 		if err != nil {
@@ -35,6 +40,17 @@ func NewElasticClient() {
 
 		if resp.IsError() {
 			log.Println("elasticsearch PING returned with error: " + resp.String())
+			os.Exit(-1)
+		}
+
+		resp, err = client.Indices.Create(ElasticIndex)
+		if err != nil {
+			log.Println("error: unable to create elasticsearch index")
+			os.Exit(-1)
+		}
+
+		if resp.IsError() && resp.StatusCode != 400 {
+			log.Println("elasticsearch index create returned with error: " + resp.String())
 			os.Exit(-1)
 		}
 
@@ -59,4 +75,17 @@ func getElasticUserAndPassword() (string, string) {
 	}
 
 	return user, pass
+}
+
+func IndexData(data []byte) {
+	resp, err := elasticClient.Index(ElasticIndex, bytes.NewReader(data))
+	if err != nil {
+		log.Println("ERROR: unable to index data: " + err.Error() + " response: " + resp.String())
+	}
+
+	if resp.IsError() {
+		log.Println("ERROR: Got response as error while indexing data: " + resp.String())
+	}
+
+	log.Println("Indexing Response: " + resp.String())
 }

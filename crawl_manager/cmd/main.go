@@ -5,9 +5,9 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/api"
-	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/cache"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/elastic"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/queue"
 )
 
@@ -30,7 +30,7 @@ func main() {
 
 	kafkaQueue := queue.NewKafkaQueue("localhost:9092", kafkaTopic, mongoDB)
 
-	core.NewElasticClient()
+	elastic.NewElasticClient()
 
 	server := api.NewServer("8080")
 

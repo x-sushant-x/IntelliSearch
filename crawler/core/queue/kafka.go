@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/segmentio/kafka-go"
-	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/segmentio/kafka-go"
+	"github.com/x-sushant-x/IntelliSearch/crawler/core"
 )
 
 const (
@@ -37,7 +38,7 @@ func (k *KafkaQueue) Consume() {
 		Topic:       k.topic,
 		Partition:   k.partition,
 		GroupID:     "crawler_group",
-		StartOffset: kafka.LastOffset,
+		StartOffset: kafka.FirstOffset,
 	})
 
 	for {
