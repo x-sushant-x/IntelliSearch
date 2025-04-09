@@ -1,3 +1,4 @@
 *.html
 crawled_pages
 crawl_manager/.env
+search_engine/.env

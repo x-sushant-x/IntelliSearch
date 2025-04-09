@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	database "github.com/x-sushant-x/IntelliSearch/search_engine/core/repository"
 	"github.com/x-sushant-x/IntelliSearch/search_engine/core/services"
+	"github.com/x-sushant-x/IntelliSearch/search_engine/elastic"
 )
 
 type Server struct {
@@ -18,11 +19,14 @@ func NewServer(port string) *Server {
 }
 
 func (s *Server) Start() {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
 
 	app.Use(cors.New())
 
 	db := database.NewMongoDBConnection()
+	elastic.NewElasticClient()
 
 	// db.CreateIndexes()
 
@@ -30,6 +34,8 @@ func (s *Server) Start() {
 	searchHandler := NewSearchHandler(svc)
 
 	app.Get("/search", searchHandler.HandleSearch)
+
+	log.Println("Server Started On Port: " + s.port)
 
 	err := app.Listen(":" + s.port)
 	if err != nil {

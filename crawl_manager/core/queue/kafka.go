@@ -13,9 +13,9 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-const (
-	crawlURLsKafkaTopic = "crawl_urls"
-)
+// const (
+// 	crawlURLsKafkaTopic = "crawl_urls"
+// )
 
 type KafkaQueue struct {
 	topic    string
@@ -82,8 +82,6 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 			continue
 		}
 
-		defer file.Close()
-
 		fileBytes, err := io.ReadAll(file)
 		if err != nil {
 			log.Println("error while reading file: " + err.Error())
@@ -91,6 +89,8 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 		}
 
 		elastic.IndexData(fileBytes)
+
+		file.Close()
 
 		// var crawledData models.CrawledPage
 
