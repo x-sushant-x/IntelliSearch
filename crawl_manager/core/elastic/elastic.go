@@ -86,6 +86,4 @@ func IndexData(data []byte) {
 	if resp.IsError() {
 		log.Println("ERROR: Got response as error while indexing data: " + resp.String())
 	}
-
-	log.Println("Indexing Response: " + resp.String())
 }

@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -9,13 +10,14 @@ import (
 
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/database"
 	"github.com/x-sushant-x/IntelliSearch/crawl_manager/core/elastic"
+	"github.com/x-sushant-x/IntelliSearch/crawl_manager/models"
 
 	"github.com/segmentio/kafka-go"
 )
 
-// const (
-// 	crawlURLsKafkaTopic = "crawl_urls"
-// )
+const (
+	crawlURLsKafkaTopic = "crawl_urls"
+)
 
 type KafkaQueue struct {
 	topic    string
@@ -60,21 +62,23 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 		StartOffset: kafka.FirstOffset,
 	})
 
-	if _, err := r.FetchMessage(context.Background()); err != nil {
-		log.Println("unable to connect to kafka: " + err.Error())
-		os.Exit(-1)
-	}
+	// if _, err := r.FetchMessage(context.Background()); err != nil {
+	// 	log.Println("unable to connect to kafka: " + err.Error())
+	// 	os.Exit(-1)
+	// }
 
 	log.Println("Connected: Kafka")
 
 	for {
 		message, err := r.ReadMessage(context.Background())
 		if err != nil {
-			log.Println("error while consuming: " + err.Error())
+			log.Println("error while consuming crawled page: " + err.Error())
 			continue
 		}
 
 		crawledFilePath := message.Value
+
+		log.Println("received crawled page for indexing: " + string(crawledFilePath))
 
 		file, err := os.Open(string(crawledFilePath))
 		if err != nil {
@@ -92,21 +96,21 @@ func (q KafkaQueue) ConsumeCrawledPages() {
 
 		file.Close()
 
-		// var crawledData models.CrawledPage
+		var crawledData models.CrawledPage
 
-		// err = json.Unmarshal(fileBytes, &crawledData)
-		// if err != nil {
-		// 	log.Println("error while marshalling file: " + err.Error())
-		// 	continue
-		// }
+		err = json.Unmarshal(fileBytes, &crawledData)
+		if err != nil {
+			log.Println("error while marshalling file: " + err.Error())
+			continue
+		}
 
 		// q.mongoDB.SaveCrawledPage(&crawledData)
 
-		// for _, newURL := range crawledData.AssociatedURLs {
-		// 	err := q.Send(crawlURLsKafkaTopic, "", newURL)
-		// 	if err != nil {
-		// 		log.Println("unable to send newly discovered url to crawler")
-		// 	}
-		// }
+		for _, newURL := range crawledData.AssociatedURLs {
+			err := q.Send(crawlURLsKafkaTopic, "", newURL)
+			if err != nil {
+				log.Println("unable to send newly discovered url to crawler")
+			}
+		}
 	}
 }
