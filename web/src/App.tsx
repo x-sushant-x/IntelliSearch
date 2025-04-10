@@ -12,6 +12,7 @@ const LandingPage: React.FC = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [selectedRepo, setSelectedRepo] = useState<string>("elastic")
 
   const fetchResults = async (query: string): Promise<void> => {
     setIsLoading(true);
@@ -19,7 +20,7 @@ const LandingPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8081/search?limit=100&query=${encodeURIComponent(query)}`,
+        `http://localhost:8081/search?limit=100&query=${encodeURIComponent(query)}&repo_type=${selectedRepo}`,
         {
           headers: {
             "User-Agent": "my-reddit-app",
@@ -28,7 +29,8 @@ const LandingPage: React.FC = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch results");
+        setError("An error occurred while fetching results. Please try again.");
+        // throw new Error("Failed to fetch results");
       }
 
       const data: SearchResult[] = await response.json();
@@ -51,6 +53,18 @@ const LandingPage: React.FC = () => {
 
   return (
     <div>
+      <div className="flex justify-end items-center px-6 py-4 ">
+        <label htmlFor="repo" className="mr-2 text-gray-700">Repo:</label>
+        <select
+          id="repo"
+          value={selectedRepo}
+          onChange={(e) => setSelectedRepo(e.target.value)}
+          className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="elastic">elastic</option>
+          <option value="mongo">mongo</option>
+        </select>
+      </div>
       <div className="flex flex-col mt-12 items-center bg-white">
         <h1 className="mb-12 text-4xl text-slate-800">IntelliSearch</h1>
 
@@ -75,7 +89,7 @@ const LandingPage: React.FC = () => {
         </div>
 
         <div className="mt-6 space-x-4">
-          <a href="https://sushantcodes.tech" className="text-blue-500 hover:underline">
+          <a href="https://beyondthesyntax.substack.com" className="text-blue-500 hover:underline">
             About
           </a>
           <a href="mailto:sushant.dhiman9812@gmail.com" className="text-blue-500 hover:underline">
