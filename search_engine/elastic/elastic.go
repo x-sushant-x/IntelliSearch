@@ -1,11 +1,14 @@
 package elastic
 
 import (
-	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/x-sushant-x/IntelliSearch/search_engine/models"
 )
 
 var (
@@ -77,15 +80,48 @@ func getElasticUserAndPassword() (string, string) {
 	return user, pass
 }
 
-func IndexData(data []byte) {
-	resp, err := elasticClient.Index(ElasticIndex, bytes.NewReader(data))
+func SearchDocuments(query string) (*[]models.SearchResponse, error) {
+	eQuery := fmt.Sprintf(`{ "query": { "multi_match": { "query": "%s", "fields": ["Title", "MetaData"] } } }`, query)
+
+	res, err := elasticClient.Search(
+		elasticClient.Search.WithIndex(ElasticIndex),
+		elasticClient.Search.WithBody(strings.NewReader(eQuery)),
+		elasticClient.Search.WithPretty(),
+	)
+
 	if err != nil {
-		log.Println("ERROR: unable to index data: " + err.Error() + " response: " + resp.String())
+		log.Printf("Error executing search query: %v", err)
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		log.Printf("Error response from Elasticsearch: %s", res.String())
+		return nil, err
 	}
 
-	if resp.IsError() {
-		log.Println("ERROR: Got response as error while indexing data: " + resp.String())
+	var elasticResponse models.ElasticResponse
+
+	err = json.NewDecoder(res.Body).Decode(&elasticResponse)
+	if err != nil {
+		log.Printf("Error executing search query: %v", err)
+		return nil, err
 	}
 
-	log.Println("Indexing Response: " + resp.String())
+	var results []models.SearchResponse
+
+	for _, result := range elasticResponse.Hits.Hits {
+
+		docData := result.Source
+
+		doc := models.SearchResponse{
+			Title:           docData.Title,
+			MetaDescription: docData.MetaData,
+			Url:             docData.URL,
+		}
+
+		results = append(results, doc)
+	}
+
+	return &results, nil
 }
