@@ -42,7 +42,7 @@ func (h SearchHandler) HandleSearch(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(resp)
 	}
 
-	return ctx.Status(http.StatusOK).JSON(map[string]string{
+	return ctx.Status(http.StatusBadRequest).JSON(map[string]string{
 		"error": "Please specify repo_type. Expected values can be mongo | elastic",
 	})
 }
