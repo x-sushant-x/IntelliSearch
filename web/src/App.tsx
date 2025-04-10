@@ -30,12 +30,18 @@ const LandingPage: React.FC = () => {
 
       if (!response.ok) {
         setError("An error occurred while fetching results. Please try again.");
-        // throw new Error("Failed to fetch results");
       }
 
       const data: SearchResult[] = await response.json();
 
-      setResults(Array.isArray(data) ? data : []);
+      const seen = new Set()
+      const uniqueData = data.filter(item => {
+        if(seen.has(item.title)) return false;
+        seen.add(item.title)
+        return true
+      })
+
+      setResults(Array.isArray(uniqueData) ? uniqueData : []);
       setIsSearched(true);
     } catch (err) {
       setError("An error occurred while fetching results. Please try again.");
